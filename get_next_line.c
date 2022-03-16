@@ -1,44 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: seunghye <seunghye@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/07 17:01:08 by seunghye          #+#    #+#             */
-/*   Updated: 2022/03/16 19:10:10 by seunghye         ###   ########.fr       */
+/*   Updated: 2022/03/17 00:41:29 by seunghye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line_bonus.h"
+#include "get_next_line.h"
 
 char	*get_next_line(int fd)
 {
 	static t_list	*lst;
 	t_list			*fd_lst;
 	char			*buf;
-	ssize_t			n;
 
-	if (fd < 0 || BUFFER_SIZE <= 0) //오류 체크
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (0);
-	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1)); //버퍼를 동적할당으로 할당 (정적할당은 제한된 스택사이즈 내에서 공간을 할당 받기 떄문)
+	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buf)
 		return (0);
-	if (ft_lstfd(lst, fd) && ft_strchr(ft_lstfd(lst, fd)->str, '\n'))
-		return (find_n(&ft_lstfd(lst, fd)->str, buf));
-	n = read(fd, buf, BUFFER_SIZE);
-	while (n > 0)
+	fd_lst = lst;
+	buf = ft_read(&lst, fd, buf, &fd_lst);
+	if (buf)
+		return (buf);
+	if (fd_lst)
 	{
-		buf[n] = 0;
-		fd_lst = ft_lstadd(&lst, fd, buf); //fd값의 노드가 없으면 lst에 노드 추가, 있다면 기존 문자열과 buf를 join
-		if (fd_lst && ft_strchr(fd_lst->str, '\n')) //개행이 있다면 개행 뒷부분을 백업하고 개행까지 문자열을 리턴
-			return (find_n(&fd_lst->str, buf));
-		n = read(fd, buf, BUFFER_SIZE);
-	}
-	free(buf);
-	if (ft_lstfd(lst, fd))
-	{
-		buf = ft_lstfd(lst, fd)->str;
+		buf = fd_lst->str;
 		ft_lstdelone(&lst, fd);
 		if (!*buf)
 		{

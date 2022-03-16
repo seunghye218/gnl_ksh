@@ -6,11 +6,11 @@
 /*   By: seunghye <seunghye@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/07 17:01:18 by seunghye          #+#    #+#             */
-/*   Updated: 2022/03/16 21:38:11 by seunghye         ###   ########.fr       */
+/*   Updated: 2022/03/17 00:41:18 by seunghye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line_bonus.h"
+#include "get_next_line.h"
 
 char	*find_n(char **str, char *buf)
 {
@@ -35,6 +35,27 @@ char	*find_n(char **str, char *buf)
 	return (until_n);
 }
 
+char	*ft_read(t_list **lst, int fd, char *buf, t_list **fd_lst)
+{
+	ssize_t	n;
+
+	while (*fd_lst && (*fd_lst)->fd != fd)
+		*fd_lst = (*fd_lst)->next;
+	if (*fd_lst && ft_strchr((*fd_lst)->str, '\n'))
+		return (find_n(&(*fd_lst)->str, buf));
+	n = read(fd, buf, BUFFER_SIZE);
+	while (n > 0)
+	{
+		buf[n] = 0;
+		*fd_lst = ft_lstadd(lst, fd, buf);
+		if (*fd_lst && ft_strchr((*fd_lst)->str, '\n'))
+			return (find_n(&(*fd_lst)->str, buf));
+		n = read(fd, buf, BUFFER_SIZE);
+	}
+	free(buf);
+	return (0);
+}
+
 t_list	*ft_lstnew(int fd, char *buf)
 {
 	t_list	*new;
@@ -49,13 +70,6 @@ t_list	*ft_lstnew(int fd, char *buf)
 	ft_strlcpy(new->str, buf, buf_size);
 	new->next = 0;
 	return (new);
-}
-
-t_list	*ft_lstfd(t_list *lst, int fd)
-{
-	while (lst && lst->fd != fd)
-		lst = lst->next;
-	return (lst);
 }
 
 t_list	*ft_lstadd(t_list **lst, int fd, char *buf)
