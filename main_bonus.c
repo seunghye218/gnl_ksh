@@ -6,6 +6,8 @@
 void	multi_fd(int fd, char *line)
 {
 	line = get_next_line(fd);
+	if (!line)
+		return ;
 	printf("fd(%d) line : %s", fd, line);
 	free(line);
 }
@@ -37,7 +39,7 @@ printf("----------------\n");
 	multi_fd(fd[1], line);
 	multi_fd(fd[2], line);
 
-	system("leaks a.out");
+	// system("leaks a.out");
 	close(fd[0]);
 	close(fd[1]);
 	close(fd[2]);
